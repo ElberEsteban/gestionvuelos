@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gestionvuelos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gestionvuelos
+  template:
+    metadata:
+      labels:
+        app: gestionvuelos
+    spec:
+      containers:
+        - name: gestionvuelos-app
+          image: gestionvuelos-app:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/db_sitas
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gestionvuelos
+spec:
+  selector:
+    app: gestionvuelos
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
